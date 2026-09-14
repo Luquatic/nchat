@@ -1,12 +1,14 @@
 nchat
 =====
 
-| **Linux** | **Mac** |
-|-----------|---------|
-| [![Linux](https://github.com/d99kris/nchat/workflows/Linux/badge.svg)](https://github.com/d99kris/nchat/actions?query=workflow%3ALinux) | [![macOS](https://github.com/d99kris/nchat/workflows/macOS/badge.svg)](https://github.com/d99kris/nchat/actions?query=workflow%3AmacOS) |
+This is a WhatsApp-focused fork of
+[d99kris/nchat](https://github.com/d99kris/nchat), a terminal-based messaging
+client for Linux and macOS. Telegram remains in the source tree temporarily,
+but is unsupported and disabled by default. Signal remains available as an
+optional build target and is also disabled by default.
 
-nchat is a terminal-based multi-protocol messaging client for Linux and macOS
-with support for Telegram, WhatsApp and Signal.
+This fork currently publishes source only. Upstream packages and pre-built
+binaries do not include the changes documented here.
 
 ![screenshot nchat](/doc/screenshot-nchat.png)
 
@@ -27,6 +29,17 @@ Features
 - Desktop notifications for new messages
 - Toggle textized vs. graphical emojis
 - Customizable [themes](https://github.com/d99kris/nchat/wiki/Themes) and key bindings
+- Vim-style Insert, Normal and Visual modes for composing messages
+- AI-assisted image descriptions through a configurable command
+
+Fork-specific defaults
+----------------------
+- `Ctrl-x` sends the composed message and `Enter` inserts a line break
+- Vim mode starts enabled; enter Normal mode with `Esc` or `jk`
+- In Normal mode, `j`/`k` select the next/previous chat and `J`/`K` select a
+  newer/older message
+- The status and help bars adapt to the active Vim mode
+- `Alt-u` describes the selected image when `describe_image_command` is set
 
 
 Usage
@@ -91,6 +104,7 @@ Interactive Commands for Selected Message:
     Alt-q       jump to quoted/replied message
     Alt-r       forward selected message
     Alt-s       add/remove reaction on selected message
+    Alt-u       describe selected image
     Alt-w       external message viewer
 
 Interactive Commands for Text Input:
@@ -119,66 +133,12 @@ tested on:
 - Ubuntu 24.04 LTS
 
 
-Install using Package Manager
-=============================
-
-macOS
------
-**Build / Install Stable Release using Brew**
-
-    brew tap d99kris/nchat
-    brew install nchat
-
-Optionally one can disable protocols using `--without-whatsapp` and
-`--without-telegram`, for example:
-
-    brew install nchat --without-telegram
-
-
-Arch Linux
-----------
-**Build / Install Latest Git**
-
-    yay -S nchat-git
-
-**Build / Install Stable Release**
-
-    yay -S nchat
-
-**Install Pre-built Binary**
-
-    yay -S nchat-bin
-
-
-Install Pre-built Binary
-========================
-Experimental support for Linux (glibc >= 2.28 or musl) x86_64 and arm64, as
-well as macOS arm64.
-
-**Install**
-
-    curl -fsSL https://raw.githubusercontent.com/d99kris/nchat/master/utils/install.sh | bash
-
-**Uninstall**
-
-    curl -fsSL https://raw.githubusercontent.com/d99kris/nchat/master/utils/uninstall.sh | bash
-
-**Install Location**
-
-Installs to `~/.local/{bin,share}`. Override via the `NCHAT_PREFIX` environment
-variable, e.g.:
-
-    export NCHAT_PREFIX=/usr/local
-
-
 Build from Source
 =================
-nchat consists of a large code-base (mainly the Telegram library tdlib), so be
-prepared for a relatively long first build time.
-
 **Get Source**
 
-    git clone https://github.com/d99kris/nchat && cd nchat
+    git clone --branch next https://github.com/Luquatic/nchat.git
+    cd nchat
 
 Using make.sh script
 --------------------
@@ -191,15 +151,18 @@ can use the `make.sh` script provided.
 
 **Build / Install**
 
-    ./make.sh build && ./make.sh install
+    NCHAT_PREFIX="$HOME/.local" ./make.sh install
 
 **Install Location**
 
-Installs to a system prefix such as `/usr/local`. Override via the
-`NCHAT_PREFIX` environment variable (a user-writable prefix installs without
-sudo/doas), e.g.:
+`NCHAT_PREFIX` is the parent of the `bin` and `lib` directories. A user-writable
+prefix installs without sudo/doas. If it is omitted, the default is
+`/usr/local`.
 
-    export NCHAT_PREFIX=~/.local
+    NCHAT_PREFIX="$HOME/.local" ./make.sh install
+
+If `~/.local/bin` is a symlink, ensure its target is writable. Protocol shared
+libraries are still installed below `~/.local/lib`.
 
 Manually
 --------
@@ -207,27 +170,27 @@ Manually
 
 macOS
 
-    brew install gperf cmake openssl ncurses ccache readline help2man sqlite libmagic go
+    brew install cmake openssl ncurses ccache readline help2man sqlite libmagic go
 
 Arch
 
-    sudo pacman -S ccache cmake file go gperf help2man ncurses openssl readline sqlite zlib base-devel
+    sudo pacman -S ccache cmake file go help2man ncurses openssl readline sqlite zlib base-devel
 
 Debian-based (Ubuntu, Raspbian, etc)
 
-    sudo apt install ccache cmake build-essential gperf help2man libreadline-dev libssl-dev libncurses-dev libncursesw5-dev ncurses-doc zlib1g-dev libsqlite3-dev libmagic-dev golang
+    sudo apt install ccache cmake build-essential help2man libreadline-dev libssl-dev libncurses-dev libncursesw5-dev ncurses-doc zlib1g-dev libsqlite3-dev libmagic-dev golang
 
 Fedora
 
-    sudo dnf install git cmake clang golang ccache file-devel file-libs gperf readline-devel openssl-devel ncurses-devel sqlite-devel zlib-devel
+    sudo dnf install git cmake clang golang ccache file-devel file-libs readline-devel openssl-devel ncurses-devel sqlite-devel zlib-devel
 
 Gentoo
 
-    sudo emerge -n dev-util/cmake dev-util/ccache dev-util/gperf sys-apps/help2man sys-libs/readline dev-libs/openssl sys-libs/ncurses sys-libs/zlib dev-db/sqlite sys-apps/file dev-lang/go
+    sudo emerge -n dev-util/cmake dev-util/ccache sys-apps/help2man sys-libs/readline dev-libs/openssl sys-libs/ncurses sys-libs/zlib dev-db/sqlite sys-apps/file dev-lang/go
 
 Void
 
-    sudo xbps-install base-devel go ccache cmake gperf help2man libmagick-devel readline-devel sqlite-devel file-devel openssl-devel
+    sudo xbps-install base-devel go ccache cmake help2man libmagick-devel readline-devel sqlite-devel file-devel openssl-devel
 
 **Extra Dependencies**
 
@@ -251,9 +214,11 @@ By default nchat requires ~3.5GB RAM to build using G++ and ~1.5GB RAM with
 clang++, but it is possible to reduce the memory needed,
 see [Building on Low Memory Systems](/doc/LOWMEMORY.md).
 
-When building from source, all features except Signal support are enabled by
-default. To enable Signal, see [Signal](/doc/SIGNAL.md); for other feature
-flags, see [Feature Flags](/doc/FLAGS.md).
+WhatsApp and the internal Dummy protocol are enabled by default. Telegram and
+Signal are disabled. Signal can be enabled explicitly as described in
+[Signal](/doc/SIGNAL.md). Telegram can still be enabled explicitly while its
+legacy implementation remains in the source tree, but it is unsupported by
+this fork. See [Feature Flags](/doc/FLAGS.md) for all build options.
 
 
 Getting Started
@@ -268,17 +233,15 @@ code. Example:
     $ nchat --setup
     Protocols:
     0. Dummy
-    1. Telegram
-    2. WhatsAppMd
-    3. Signal
-    4. Exit setup
-    Select protocol (4): 1
+    1. WhatsAppMd
+    2. Exit setup
+    Select protocol (2): 1
     Enter phone number (ex. +6511111111): +6511111111
 
-    Open Telegram on your phone, go to Settings -> Devices
+    Open WhatsApp on your phone, go to Settings -> Linked devices
     and click Link Desktop Device and scan the QR code.
     ...
-    Succesfully set up profile Telegram_+6511111111
+    Successfully set up profile WhatsAppMd_+6511111111
 
 By default, nchat uses QR code authentication. The QR code should be scanned
 using the official app on the primary device. To use authentication code
@@ -289,8 +252,6 @@ and look for the phone number under Settings or Profile section, and use
 the number displayed there (omitting spaces, so for the below screenshot
 the number to enter is `+6511111111`).
 
-![screenshot telegram phone](/doc/screenshot-phone.png)
-
 Once the setup process is completed, the main UI of nchat will be loaded.
 
 In order to set up multiple protocols/profiles, exit nchat and perform the
@@ -300,12 +261,6 @@ setup step again. To remove a protocol account, use `nchat --remove`.
 Troubleshooting
 ===============
 Refer to [Debugging](/doc/DEBUGGING.md) for details.
-
-
-Telegram Group
-==============
-A Telegram group [https://t.me/nchatusers](https://t.me/nchatusers) is
-available for users to discuss nchat usage and related topics.
 
 
 Security
@@ -402,7 +357,7 @@ restricted to listing emojis that renders properly in common terminals.
 
 ### link_send_preview
 
-Specifies whether to enable preview for links in messages sent (Telegram only).
+Legacy Telegram-only setting; it has no effect in the supported WhatsApp build.
 
 ### logdump_enabled
 
@@ -449,7 +404,7 @@ format:
 
 Stores the environment variable flag `USE_PAIRING_CODE` if set during setup.
 It specifies whether to use pairing code / authentication code instead of
-QR code (Telegram/WhatsApp).
+QR code (WhatsApp).
 
 ### use_qr_terminal
 
@@ -883,7 +838,7 @@ window is inactive.
 
 ### terminal_title
 
-Specifies custom terminal title, ex: `terminal_title=nchat - telegram`.
+Specifies custom terminal title, ex: `terminal_title=nchat - whatsapp`.
 
 ### top_enabled
 
@@ -1171,11 +1126,11 @@ With a source code copy, simply copy the theme files to the config directory
 
 ### Installing theme from web
 
-One can fetch current `master` copy of a theme from the github repository and
+One can fetch the current `next` copy of a theme from this repository and
 download to the config directory (while nchat is not running). Example
 installing `dracula` theme:
 
-    THEME="dracula" ; curl -L "https://raw.githubusercontent.com/d99kris/nchat/refs/heads/master/themes/${THEME}/{color.conf,usercolor.conf}" -o ~/.config/nchat/#1
+    THEME="dracula" ; curl -L "https://raw.githubusercontent.com/Luquatic/nchat/refs/heads/next/themes/${THEME}/{color.conf,usercolor.conf}" -o ~/.config/nchat/#1
 
 ### Generating theme from iTerm2-Color-Schemes
 
@@ -1198,36 +1153,6 @@ Protocol-Specific Configuration
 
 The following configuration files (listed with current default values) can be
 used to configure nchat.
-
-~/.config/nchat/profiles/Telegram_+nnnnn/telegram.conf
-------------------------------------------------------
-This configuration file holds protocol-specific settings for Telegram. Default
-content:
-
-    local_key=
-    markdown_enabled=1
-    markdown_version=1
-    profile_display_name=
-
-### local_key
-
-For internal use by nchat only.
-
-### markdown_enabled
-
-Specifies whether to enable Markdown <-> text conversion for text messages
-(default enabled).
-
-### markdown_version
-
-Specifies which Telegram Markdown version to use (default 1).
-
-### profile_display_name
-
-Specifies an optional short/display name in the status bar when using nchat
-with multiple profiles. The default profile name is `Telegram` or
-`Telegram_+nnnnn` (when more than one Telegram profile is set up) if this
-setting is not specified.
 
 ~/.config/nchat/profiles/WhatsAppMd_+nnnnn/whatsappmd.conf
 ----------------------------------------------------------
@@ -1294,36 +1219,14 @@ more colors than two, or the terminal may be set up with gray mapped to black.
 In this case sent / own messages may appear invisible. To avoid nchat using
 gray one can edit `~/.config/nchat/color.conf` and remove occurances of `gray`.
 
-### 5. How to use Telegram and WhatsApp concurrently or switch between them?
+### 5. How to set up WhatsApp without scanning a QR code?
 
-The **recommended** method is to set up nchat with one config directory per
-protocol/phone number, and run each instance in separate terminal windows/tabs.
-To simplify such usage one can set up aliases, for example:
-
-    alias telegram='nchat -d ~/.config/nchat-telegram'
-    alias whatsapp='nchat -d ~/.config/nchat-whatsapp'
-
-Then use regular setup for them (separately), for example:
-
-    telegram -s
-    whatsapp -s
-
-The **alternative** method is to set up multiple protocol accounts in a single
-nchat config directory. For each protocol/phone nubmer, run setup mode and exit
-after initial sync:
-
-    nchat -s
-
-### 6. How to set up Telegram / WhatsApp without scanning a QR code?
-
-By default setting up a Telegram or WhatsApp account will display a QR code
-to be scanned using the mobile application on the primary device. As an
-alternative one can set an environment flag to use authentication code
-(Telegram) or pairing code (WhatsApp) instead:
+By default, setting up WhatsApp displays a QR code to scan using the mobile
+application on the primary device. To use a pairing code instead:
 
     USE_PAIRING_CODE=1 nchat -s
 
-### 7. No QR code is shown when setting up Telegram / WhatsApp / Signal?
+### 6. No QR code is shown when setting up WhatsApp?
 
 By default nchat will attempt to detect if the system is capable of viewing
 images using a GUI image viewer, and if detected (indicated by "has gui" in
@@ -1333,7 +1236,7 @@ the QR code in the terminal:
 
     USE_QR_TERMINAL=1 nchat -s
 
-### 8. Build fails with `c++: fatal error: Killed signal terminated program cc1plus`?
+### 7. Build fails with `c++: fatal error: Killed signal terminated program cc1plus`?
 
 This often means that OOM killer has terminated the compilation due to the
 system running out of free RAM.
@@ -1342,18 +1245,10 @@ If the system has **less than 4 GB RAM**, please refer to
 [Building on Low Memory Systems](/doc/LOWMEMORY.md).
 
 If the system has **4 GB RAM or more**, the problem can occur if parallelism
-is set too high, which is likely to be encountered when installing from the
-Arch Linux AUR package. A workaround for the AUR package is to manually
-restrict max number of parallel jobs to `available RAM in GB` divided by 4.
-For example a system with 8 GB would then need to use max 8 / 4 = 2 jobs:
+is set too high. The `make.sh` script limits parallel jobs based on the system
+capabilities; use it rather than invoking the build tool directly.
 
-    CMAKE_BUILD_PARALLEL_LEVEL=2 yay -S nchat
-
-Alternatively one can [Build from Source](#build-from-source) using the
-`make.sh` script, which sets parallel job count based on the system
-capabilities.
-
-### 9. Terminal transparency is not working?
+### 8. Terminal transparency is not working?
 
 If on Linux, try removing any custom default background set up, i.e. set
 `default_color_bg=` in `~/.config/nchat/color.conf`.
@@ -1361,11 +1256,10 @@ If on Linux, try removing any custom default background set up, i.e. set
 
 Project Scope
 =============
-nchat is feature-complete and in maintenance mode. It is not intended to be a
-full-featured client on par with official Telegram / WhatsApp / Signal
-clients, but rather a light-weight client providing essential functionality
-suitable for the terminal. See [Project Scope](/doc/SCOPE.md) for further
-details.
+nchat is feature-complete and in maintenance mode. This fork focuses on the
+essential WhatsApp functionality suitable for the terminal rather than parity
+with the official client. The upstream maintenance policy is documented in
+[Project Scope](/doc/SCOPE.md).
 
 
 Contributions
@@ -1377,11 +1271,6 @@ Please refer to [Project Scope](/doc/SCOPE.md),
 
 Alternatives
 ============
-Terminal-based Telegram clients:
-
-- [tg](https://github.com/paul-nameless/tg)
-- [tgt](https://github.com/FedericoBruzzone/tgt)
-
 Terminal-based WhatsApp clients:
 
 - [whatscli](https://github.com/normen/whatscli)
@@ -1393,15 +1282,6 @@ Terminal-based Signal clients:
 
 Technical Details
 =================
-
-Custom API Id / Hash
---------------------
-nchat uses its own Telegram API id and hash by default. To use custom id/hash,
-obtained from [https://my.telegram.org/](https://my.telegram.org/) one may set
-environment variables `TG_APIID` and `TG_APIHASH` when setting up a new Telegram
-account. Example (below values must be changed to valid api id/hash):
-
-    TG_APIID="123456" TG_APIHASH="aaeaeab342aaa23423" nchat -s
 
 Third-party Libraries
 ---------------------
@@ -1444,7 +1324,7 @@ includes the source code of the following third-party libraries:
   Copyright 2022 Tulir Asokan -
   [MPL License](/lib/wmchat/go/ext/whatsmeow/LICENSE)
 
-Binaries are distributed with a combined THIRD_PARTY_LICENSES file.
+Locally built binaries include a combined THIRD_PARTY_LICENSES file.
 
 The [tdlib](https://github.com/tdlib/td),
 [whatsmeow](https://github.com/tulir/whatsmeow) and
@@ -1465,11 +1345,11 @@ License
 =======
 Source is distributed under the [MIT license](/LICENSE).
 
-Binaries are distributed under the [GNU AGPL v3 license](/LICENSE.AGPL-3.0),
-or the [GNU GPL v3 license](/LICENSE.GPL-3.0) if Signal support is disabled.
+Built binaries are covered by the [GNU AGPL v3 license](/LICENSE.AGPL-3.0), or
+the [GNU GPL v3 license](/LICENSE.GPL-3.0) if Signal support is disabled.
 
 
 Keywords
 ========
-command line, console-based, linux, macos, chat client, ncurses, telegram,
-terminal-based, tui.
+command line, console-based, linux, macos, chat client, ncurses, terminal-based,
+tui, vim, whatsapp.

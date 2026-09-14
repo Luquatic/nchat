@@ -212,7 +212,7 @@ option(HAS_DUMMY "Dummy" ON)
 message(STATUS "Dummy: ${HAS_DUMMY}")
 
 # Optional component - Telegram
-option(HAS_TELEGRAM "Telegram" ON)
+option(HAS_TELEGRAM "Telegram" OFF)
 message(STATUS "Telegram: ${HAS_TELEGRAM}")
 
 # Optional component - WhatsApp

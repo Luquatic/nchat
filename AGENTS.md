@@ -16,7 +16,7 @@
 ## Build And Test
 
 - Use `./make.sh build` for the normal Release build in `build/`; use `./make.sh debug` for a Debug build in `dbgbuild/`.
-- This fork does not support Telegram. Test builds disable it automatically. Use `NCHAT_CMAKEARGS="-D..." ./make.sh build` for other CMake flags, or the wrapper's `--no-whatsapp` option. WhatsApp or Signal requires Go 1.23+.
+- This fork supports WhatsApp by default. Telegram remains in the source temporarily but is unsupported and defaults off; Signal is optional and also defaults off. Use `NCHAT_CMAKEARGS="-D..." ./make.sh build` for CMake flags, or the wrapper's `--no-whatsapp` option. WhatsApp or Signal requires Go 1.23+; an explicit legacy Telegram build also requires `gperf`.
 - `make.sh` intentionally limits parallel jobs based on compiler and available RAM; do not replace it with unrestricted parallelism casually.
 - After configuration, build a focused target with `cmake --build build --target <target>` rather than rebuilding everything.
 - `./make.sh tests` performs a Telegram-free Release build and then runs all project tests with CTest. For a configured tree, run one test with `ctest --test-dir build -R '^test001$' --output-on-failure` (replace the test name as needed).
