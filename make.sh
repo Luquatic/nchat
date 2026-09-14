@@ -139,6 +139,11 @@ while [[ ${#} -gt 0 ]]; do
   shift
 done
 
+# Telegram is not supported by this fork and is excluded from test builds.
+if [[ "${TESTS}" == "1" ]]; then
+  CMAKEARGS="-DHAS_TELEGRAM=OFF ${CMAKEARGS}"
+fi
+
 # detect os / distro
 OS="$(uname)"
 if [[ "${OS}" == "Linux" ]]; then

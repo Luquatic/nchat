@@ -30,6 +30,7 @@ void UiConfig::Init()
     { "confirm_archiving", "1" },
     { "confirm_deletion", "1" },
     { "confirm_send_pasted_image", "1" },
+    { "describe_image_command", "" },
     { "desktop_notify_active_current", "0" },
     { "desktop_notify_active_noncurrent", "1" },
     { "desktop_notify_command", "" },
@@ -82,6 +83,9 @@ void UiConfig::Init()
     { "typing_status_share", "1" },
     { "undo_clear_input", "1" },
     { "unread_indicator", "*" },
+    { "vim_insert_escape", "jk" },
+    { "vim_insert_escape_timeout_ms", "250" },
+    { "vim_mode", "1" },
   };
 
   const std::string configPath(FileUtil::GetApplicationDir() + std::string("/ui.conf"));

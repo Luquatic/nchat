@@ -30,7 +30,7 @@ void UiHelpView::Draw()
   static std::wstring otherHelpItem = []()
   {
     std::vector<std::wstring> helpItems;
-    AppendHelpItem("other_commands_help", "OtherCmd", helpItems);
+    AppendHelpItem("other_commands_help", "More", helpItems);
     return !helpItems.empty() ? L" | " + helpItems.at(0) : std::wstring();
   }();
 
@@ -97,6 +97,7 @@ void UiHelpView::Draw()
     AppendHelpItem("select_mention", "Mention", helpItems);
     AppendHelpItem("spell", "ExtSpell", helpItems);
     AppendHelpItem("auto_compose", "AutoComp", helpItems);
+    AppendHelpItem("describe_image", "DescImg", helpItems);
     AppendHelpItem("decrease_list_width", "DecListW", helpItems);
     AppendHelpItem("increase_list_width", "IncListW", helpItems);
 
@@ -112,7 +113,47 @@ void UiHelpView::Draw()
     return helpItems;
   }();
 
-  static std::vector<std::wstring> mainSelectHelpItems = []()
+  static std::vector<std::wstring> vimNormalPreHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems;
+    AppendHelpItem("send_msg", "Send", helpItems);
+    helpItems.push_back(L"j/k Chats");
+    helpItems.push_back(L"J/K Messages");
+    helpItems.push_back(L"h/l Cursor");
+    helpItems.push_back(L"w/b Words");
+    helpItems.push_back(L"0/$ Line");
+    helpItems.push_back(L"i/a Insert");
+    helpItems.push_back(L"v Visual");
+    AppendHelpItem("react", "React", helpItems);
+    AppendHelpItem("transfer", "SendMedia", helpItems);
+    return helpItems;
+  }();
+
+  static std::vector<std::wstring> vimInsertPreHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems;
+    AppendHelpItem("send_msg", "Send", helpItems);
+    const std::wstring vimInsertEscape = StrUtil::ToWString(UiConfig::GetStr("vim_insert_escape"));
+    helpItems.push_back((vimInsertEscape.size() == 2) ? vimInsertEscape + L" Normal" : L"Esc Normal");
+    helpItems.push_back(L"Up/Down Messages");
+    AppendHelpItem("react", "React", helpItems);
+    AppendHelpItem("transfer", "SendMedia", helpItems);
+    return helpItems;
+  }();
+
+  static std::vector<std::wstring> vimVisualPreHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems;
+    AppendHelpItem("send_msg", "Send", helpItems);
+    helpItems.push_back(L"Esc Normal");
+    helpItems.push_back(L"h/l/w/b Select");
+    helpItems.push_back(L"d/c/y/x Apply");
+    AppendHelpItem("react", "React", helpItems);
+    AppendHelpItem("transfer", "SendMedia", helpItems);
+    return helpItems;
+  }();
+
+  static std::vector<std::wstring> legacySelectHelpItems = []()
   {
     std::vector<std::wstring> helpItems;
     helpItems.insert(std::end(helpItems), std::begin(mainPreHelpItems), std::end(mainPreHelpItems));
@@ -135,7 +176,7 @@ void UiHelpView::Draw()
     return helpItems;
   }();
 
-  static std::vector<std::wstring> mainDefaultHelpItems = []()
+  static std::vector<std::wstring> legacyDefaultHelpItems = []()
   {
     std::vector<std::wstring> helpItems;
     helpItems.insert(std::end(helpItems), std::begin(mainPreHelpItems), std::end(mainPreHelpItems));
@@ -149,12 +190,87 @@ void UiHelpView::Draw()
     return helpItems;
   }();
 
+  static std::vector<std::wstring> vimNormalSelectHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems = vimNormalPreHelpItems;
+    AppendHelpItem("open", "OpenMedia", helpItems);
+    AppendHelpItem("save", "SaveMedia", helpItems);
+    AppendHelpItem("describe_image", "Describe", helpItems);
+    AppendHelpItem("delete_msg", "DelMsg", helpItems);
+    AppendHelpItem("edit_msg", "EditMsg", helpItems);
+    AppendHelpItem("open_link", "OpenLink", helpItems);
+    AppendHelpItem("jump_quoted", "JumpQuoted", helpItems);
+    AppendHelpItem("open_msg", "ExtView", helpItems);
+    AppendHelpItem("forward_msg", "FwdMsg", helpItems);
+    helpItems.insert(std::end(helpItems), std::begin(mainPostHelpItems), std::end(mainPostHelpItems));
+    return helpItems;
+  }();
+
+  static std::vector<std::wstring> vimInsertSelectHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems = vimInsertPreHelpItems;
+    AppendHelpItem("open", "OpenMedia", helpItems);
+    AppendHelpItem("save", "SaveMedia", helpItems);
+    AppendHelpItem("describe_image", "Describe", helpItems);
+    AppendHelpItem("delete_msg", "DelMsg", helpItems);
+    AppendHelpItem("edit_msg", "EditMsg", helpItems);
+    AppendHelpItem("open_link", "OpenLink", helpItems);
+    AppendHelpItem("jump_quoted", "JumpQuoted", helpItems);
+    AppendHelpItem("open_msg", "ExtView", helpItems);
+    AppendHelpItem("forward_msg", "FwdMsg", helpItems);
+    helpItems.insert(std::end(helpItems), std::begin(mainPostHelpItems), std::end(mainPostHelpItems));
+    return helpItems;
+  }();
+
+  static std::vector<std::wstring> vimNormalDefaultHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems = vimNormalPreHelpItems;
+    AppendHelpItem("delete_chat", "DelChat", helpItems);
+    AppendHelpItem("archive_chat", "ArcChat", helpItems);
+    AppendHelpItem("pin", "Pin", helpItems);
+    helpItems.insert(std::end(helpItems), std::begin(mainPostHelpItems), std::end(mainPostHelpItems));
+    return helpItems;
+  }();
+
+  static std::vector<std::wstring> vimInsertDefaultHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems = vimInsertPreHelpItems;
+    AppendHelpItem("delete_chat", "DelChat", helpItems);
+    AppendHelpItem("archive_chat", "ArcChat", helpItems);
+    AppendHelpItem("pin", "Pin", helpItems);
+    helpItems.insert(std::end(helpItems), std::begin(mainPostHelpItems), std::end(mainPostHelpItems));
+    return helpItems;
+  }();
+
+  static std::vector<std::wstring> vimVisualSelectHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems = vimVisualPreHelpItems;
+    AppendHelpItem("open", "OpenMedia", helpItems);
+    AppendHelpItem("save", "SaveMedia", helpItems);
+    AppendHelpItem("describe_image", "Describe", helpItems);
+    helpItems.insert(std::end(helpItems), std::begin(mainPostHelpItems), std::end(mainPostHelpItems));
+    return helpItems;
+  }();
+
+  static std::vector<std::wstring> vimVisualDefaultHelpItems = []()
+  {
+    std::vector<std::wstring> helpItems = vimVisualPreHelpItems;
+    helpItems.insert(std::end(helpItems), std::begin(mainPostHelpItems), std::end(mainPostHelpItems));
+    return helpItems;
+  }();
+
   static std::vector<std::wstring> listDialogHelpViews;
   static std::vector<std::wstring> fileListDialogHelpViews;
   static std::vector<std::wstring> messageDialogHelpViews;
   static std::vector<std::wstring> editMessageHelpViews;
-  static std::vector<std::wstring> selectHelpViews;
-  static std::vector<std::wstring> defaultHelpViews;
+  static std::vector<std::wstring> legacySelectHelpViews;
+  static std::vector<std::wstring> legacyDefaultHelpViews;
+  static std::vector<std::wstring> vimNormalSelectHelpViews;
+  static std::vector<std::wstring> vimInsertSelectHelpViews;
+  static std::vector<std::wstring> vimNormalDefaultHelpViews;
+  static std::vector<std::wstring> vimInsertDefaultHelpViews;
+  static std::vector<std::wstring> vimVisualSelectHelpViews;
+  static std::vector<std::wstring> vimVisualDefaultHelpViews;
 
   static int prevW = 0;
   if (m_W != prevW)
@@ -166,8 +282,14 @@ void UiHelpView::Draw()
     fileListDialogHelpViews = GetHelpViews(maxW, fileListDialogHelpItems, otherHelpItem);
     messageDialogHelpViews = GetHelpViews(maxW, messageDialogHelpItems, otherHelpItem);
     editMessageHelpViews = GetHelpViews(maxW, editMessageHelpItems, otherHelpItem);
-    selectHelpViews = GetHelpViews(maxW, mainSelectHelpItems, otherHelpItem);
-    defaultHelpViews = GetHelpViews(maxW, mainDefaultHelpItems, otherHelpItem);
+    legacySelectHelpViews = GetHelpViews(maxW, legacySelectHelpItems, otherHelpItem);
+    legacyDefaultHelpViews = GetHelpViews(maxW, legacyDefaultHelpItems, otherHelpItem);
+    vimNormalSelectHelpViews = GetHelpViews(maxW, vimNormalSelectHelpItems, otherHelpItem);
+    vimInsertSelectHelpViews = GetHelpViews(maxW, vimInsertSelectHelpItems, otherHelpItem);
+    vimNormalDefaultHelpViews = GetHelpViews(maxW, vimNormalDefaultHelpItems, otherHelpItem);
+    vimInsertDefaultHelpViews = GetHelpViews(maxW, vimInsertDefaultHelpItems, otherHelpItem);
+    vimVisualSelectHelpViews = GetHelpViews(maxW, vimVisualSelectHelpItems, otherHelpItem);
+    vimVisualDefaultHelpViews = GetHelpViews(maxW, vimVisualDefaultHelpItems, otherHelpItem);
   }
 
   static int colorPair = UiColorConfig::GetColorPair("help_color");
@@ -196,11 +318,17 @@ void UiHelpView::Draw()
   }
   else if (m_Model->GetSelectMessageActiveLocked())
   {
-    wstr = selectHelpViews.at(m_Model->GetHelpOffsetLocked() % selectHelpViews.size());
+    const std::vector<std::wstring>& helpViews = !m_Model->GetVimModeLocked() ? legacySelectHelpViews :
+      (m_Model->GetVimVisualLocked() ? vimVisualSelectHelpViews :
+       (m_Model->GetVimInsertModeLocked() ? vimInsertSelectHelpViews : vimNormalSelectHelpViews));
+    wstr = helpViews.at(m_Model->GetHelpOffsetLocked() % helpViews.size());
   }
   else
   {
-    wstr = defaultHelpViews.at(m_Model->GetHelpOffsetLocked() % defaultHelpViews.size());
+    const std::vector<std::wstring>& helpViews = !m_Model->GetVimModeLocked() ? legacyDefaultHelpViews :
+      (m_Model->GetVimVisualLocked() ? vimVisualDefaultHelpViews :
+       (m_Model->GetVimInsertModeLocked() ? vimInsertDefaultHelpViews : vimNormalDefaultHelpViews));
+    wstr = helpViews.at(m_Model->GetHelpOffsetLocked() % helpViews.size());
   }
 
   wstr = L" " + wstr + std::wstring(std::max(m_W - (int)wstr.size(), 0), L' ');

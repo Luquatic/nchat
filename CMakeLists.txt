@@ -398,9 +398,23 @@ add_custom_command(
   VERBATIM
 )
 
+set(DESCRIBE_SCRIPT_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/describescript.h")
+add_custom_command(
+  OUTPUT "${DESCRIBE_SCRIPT_HEADER}"
+  COMMAND "${CMAKE_COMMAND}"
+          -DIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/src/describe
+          -DOUT_FILE=${DESCRIBE_SCRIPT_HEADER}
+          -DVAR_NAME=DescribeScript
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/utils/embedfile.cmake
+  DEPENDS src/describe utils/embedfile.cmake
+  COMMENT "Embedding describe script"
+  VERBATIM
+)
+
 # Application
 add_executable(nchat
   ${COMPOSE_SCRIPT_HEADER}
+  ${DESCRIBE_SCRIPT_HEADER}
   src/main.cpp
   src/ui.cpp
   src/ui.h

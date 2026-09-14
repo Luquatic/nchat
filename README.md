@@ -478,6 +478,7 @@ This configuration file holds general user interface settings. Default content:
     confirm_archiving=1
     confirm_deletion=1
     confirm_send_pasted_image=1
+    describe_image_command=
     desktop_notify_active_current=0
     desktop_notify_active_noncurrent=1
     desktop_notify_command=
@@ -530,6 +531,9 @@ This configuration file holds general user interface settings. Default content:
     typing_status_share=1
     undo_clear_input=1
     unread_indicator=*
+    vim_insert_escape=jk
+    vim_insert_escape_timeout_ms=250
+    vim_mode=1
 
 ### attachment_indicator
 
@@ -554,6 +558,15 @@ Specifies whether to indicate away status in the top bar while sharing away
 status with other users. I.e. the status will read `Away` instead of `Online`
 when the terminal is inactive (assuming `online_status_share=1` and
 `online_status_dynamic=1`).
+
+### describe_image_command
+
+Specifies a custom command used to describe the selected image attachment.
+The command shall include `%1`, which is replaced by the attachment path. If
+not specified, nchat extracts its bundled [describe](/src/describe) script and
+runs `python3 '(tempdir)/describe' -i '%1'`. The default service is OpenAI and
+requires `OPENAI_API_KEY`; the script also supports Gemini, Ollama, and custom
+OpenAI-compatible endpoints. Pressing the `describe_image` key invokes it.
 
 
 ### auto_compose_command
@@ -898,6 +911,41 @@ is enabled.
 
 Specifies the character to suffix chats with unread messages in the chat list.
 
+### vim_insert_escape
+
+Specifies a two-character sequence that switches from insert mode to normal
+mode. The first character is inserted immediately; entering the second within
+`vim_insert_escape_timeout_ms` removes the first character and changes mode.
+Set this to an empty value to disable the sequence.
+
+### vim_insert_escape_timeout_ms
+
+Specifies how quickly the two `vim_insert_escape` characters must be entered.
+The default is `250` milliseconds.
+
+### vim_mode
+
+Specifies whether to enable vim-style modal editing in the message compose
+entry. Default `1` (enabled). The entry starts in insert mode;
+press `Esc` for normal mode. The current mode is shown as a colored badge in
+the status bar (configurable via the `vim_*_color` / `vim_*_attr` keys in
+`color.conf`) and as a cursor shape (bar in insert, block in normal).
+
+Supported commands in normal mode:
+
+| Group | Commands |
+| ----- | -------- |
+| Motions | `h l 0 ^ $`, `w e b W E B`, `( )` (sentence), `{ }` (paragraph), `gg G`, `f F t T` |
+| Navigation | `j k` (next/previous chat), `J K` (newer/older message) |
+| Operators | `d c y` + any motion; `dd cc yy` (line); `D C` (to end of line) |
+| Edit | `x X`, `s S` (substitute), `o O` (open line), `p P` (paste) |
+| Modes | `i a A I` (insert), `v` (visual), `Esc` (normal) |
+| Counts | e.g. `3w`, `d3w`, `2dd` |
+
+Visual mode (`v`) highlights the selection and applies `d c y x` to it.
+Up and Down navigate message history in both insert and normal modes.
+When `vim_mode=0` there is no behavioral change and zero overhead.
+
 ~/.config/nchat/key.conf
 ------------------------
 This configuration file holds user interface key bindings. Default content:
@@ -919,6 +967,7 @@ This configuration file holds user interface key bindings. Default content:
     delete_line_after_cursor=KEY_CTRLK
     delete_line_before_cursor=KEY_CTRLU
     delete_msg=KEY_CTRLD
+    describe_image=\33\165
     down=KEY_DOWN
     edit_msg=KEY_CTRLZ
     end=KEY_END
@@ -1033,6 +1082,25 @@ This configuration file holds user interface color settings. Default content:
     top_attr=reverse
     top_color_bg=
     top_color_fg=
+    vim_insert_attr=bold
+    vim_insert_color_bg=bright_green
+    vim_insert_color_fg=black
+    vim_normal_attr=bold
+    vim_normal_color_bg=bright_blue
+    vim_normal_color_fg=black
+    vim_visual_attr=bold
+    vim_visual_color_bg=bright_yellow
+    vim_visual_color_fg=black
+
+Vim mode badge colors (`vim_*_color_bg`, `vim_*_color_fg`, `vim_*_attr`):
+
+| Prefix | Default badge |
+| ------ | ------------- |
+| `vim_normal_*` | bright-blue bg / black fg (bold) |
+| `vim_insert_*` | bright-green bg / black fg (bold) |
+| `vim_visual_*` | bright-yellow bg / black fg (bold) |
+
+Conventional vim/airline mode colors. Configurable via `vim_normal_*` / `vim_insert_*` / `vim_visual_*` in `color.conf`.
 
 Supported text attributes `_attr` (defaults to `normal` if not specified):
 

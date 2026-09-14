@@ -725,6 +725,6 @@ void ShowVersion()
     "Combined distribution subject to MIT license.\n"
 #endif
     "\n"
-    "Written by Kristofer Berggren.\n";
+    "Written by Kristofer Berggren. Enhanced by Luquatic\n";
   // *INDENT-ON*
 }
